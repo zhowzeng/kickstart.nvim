@@ -911,12 +911,11 @@ do
     -- Enable syntax highlighting and other treesitter features
     vim.treesitter.start(buf, language)
 
-    -- Enable treesitter based folds
+    -- Enable treesitter based folds (replaced by nvim-ufo, see section 8.5)
     -- For more info on folds see `:help folds`
-    vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-    vim.wo.foldmethod = 'expr'
-    -- Start with all folds open
-    vim.wo.foldlevel = 99
+    -- vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+    -- vim.wo.foldmethod = 'expr'
+    -- vim.wo.foldlevel = 99
 
     -- Check if treesitter indentation is available for this language, and if so enable it
     -- in case there is no indent query, the indentexpr will fallback to the vim's built in one
@@ -948,6 +947,31 @@ do
       end
     end,
   })
+end
+
+-- ============================================================
+-- SECTION 8.5: FOLDS (nvim-ufo)
+-- Better fold support with treesitter + LSP, handles injected languages
+-- ============================================================
+do
+  vim.pack.add {
+    gh 'kevinhwang91/nvim-ufo',
+    gh 'kevinhwang91/promise-async',
+  }
+
+  vim.o.foldlevel = 99
+  vim.o.foldlevelstart = 99
+  vim.o.foldenable = true
+
+  require('ufo').setup {
+    provider_selector = function(bufnr, filetype, buftype)
+      return { 'treesitter', 'indent' }
+    end,
+  }
+
+  -- Override zR / zM to use ufo's open/close all
+  vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
+  vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
 end
 
 -- ============================================================
